@@ -4,7 +4,7 @@ import var_dump
 import prettytable
 from prettytable import PrettyTable
 
-not_empty_file = False
+empty_file = False
 
 def first_task():
 
