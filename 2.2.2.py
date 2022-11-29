@@ -4,7 +4,7 @@ import var_dump
 import prettytable
 from prettytable import PrettyTable
 
-not_empty_file = False
+file_is_empty = False
 
 def first_task():
 
@@ -103,7 +103,7 @@ def first_task():
 
     if (correct_input):
         dataSet = DataSet(file_name)
-    if (not_empty_file):
+    if (file_is_empty):
         var_dump.var_dump(dataSet)
 
 
