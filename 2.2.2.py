@@ -4,19 +4,36 @@ import var_dump
 import prettytable
 from prettytable import PrettyTable
 
-file_is_empty = False
+is_empty_file = False
 
 def first_task():
+    '''функция, запускающая процесс формирования датасета
 
+    :return: функция не возвращает значений
+    '''
     correct_input = True
 
     class DataSet:
+        '''Класс для представления набора данных
+
+        Attributes:
+            correct_input (bool): Флаг корректности пользовательского ввода
+        '''
 
         def __init__(self, file_name):
+            '''
+
+            :param file_name (str): название файла
+            '''
             setattr(self, 'file_name', file_name)
             setattr(self, 'vacancies_objects', self.csv_filer(file_name))
 
         def get_vacancies(self, file_name):
+            ''' Метод, извлекающий данные из файла
+
+            :param file_name(str): название файла
+            :return: массив c данными и массив с названиями колонок
+            '''
             with open(file_name, encoding='utf-8-sig') as csv_file:
                 reader = csv.reader(csv_file)
                 data = [row for row in reader]
@@ -30,6 +47,11 @@ def first_task():
             return data, titles
 
         def csv_filer(self, file_name):
+            '''Эта функция формирует массив словарей вакансий
+
+            :param file_name(str): название файла
+            :return: массив словарей с данными для корректных вакансий
+            '''
             data = self.get_vacancies(file_name)
             if not data:
                 return
@@ -57,8 +79,24 @@ def first_task():
             return result
 
     class Vacancy:
+        '''класс для пердставления вакансии
 
+        Attributes:
+            name(str): название вакансии
+            description(str): описание вакансии
+            key_skills(str): ключевые навыки
+            experience_id(str): опыт работы
+            premium(bool): флаг премиальности вакансии
+            employer_name(str): Название работадателя
+            salary(Salary): класс зарплаты
+            area_name(str): название локации
+            published_at(str): дата публикации
+        '''
         def __init__(self, vacancy_dict):
+            '''конструктор класса вакансии
+
+            :param vacancy_dict: словарь с данными о вакансии
+            '''
             self.name = vacancy_dict['name']
             self.description = remove_repeated_spaces(clear_html(vacancy_dict['description']))
             self.key_skills = vacancy_dict['key_skills'].split('\n')
@@ -72,21 +110,47 @@ def first_task():
             self.published_at = vacancy_dict['published_at']
 
     class Salary:
+        '''класс для представления зарплаты
 
+        Attributes:
+            salary_from(str or int or float): нижняя граница зарплаты
+            salary_to(str or int or float): верхняя граница зарплаты
+            salary_gross(bool): флаг наличия вычета налогов
+            salary_currency(str): валюта оклада
+        '''
         def __init__(self, salary_components):
+            ''' Конструктор класса зарплаты
+
+            :param salary_components: словарь с полями класса
+            '''
             for key in salary_components:
                 setattr(self, key, salary_components[key])
 
     def clear_html(vacancy_field):
+        ''' Отчищает строку от html тегов
+
+        :param vacancy_field(str): строка с тегами
+        :return(str): строка без тегов
+        '''
         return re.sub(r"<.*?>", "", vacancy_field)
 
     def contains_empty_fields(vacancy):
+        ''' проверяет наличие пустых полей в вакансии
+
+        :param vacancy(Vacancy or dict): данные о вакансии
+        :return(bool): true при наличии пустых полей, false при их отсутствии
+        '''
         for field in vacancy:
             if not field or field.isspace():
                 return True
         return False
 
     def remove_repeated_spaces(text):
+        ''' удаляет повторы пробелов из строки
+
+        :param text(str): строка с пробелами
+        :return(str): строка без пробелов
+        '''
         text = re.sub(r"\n", ', ', text)
         text = re.sub(r" +", " ", text)
         text = text.strip()
@@ -103,18 +167,46 @@ def first_task():
 
     if (correct_input):
         dataSet = DataSet(file_name)
-    if (file_is_empty):
+    if (is_empty_file):
         var_dump.var_dump(dataSet)
 
 
 def second_task():
+    '''функция запуска процесса формирования таблицы с данными
+
+    :return: функция не возвращает значений
+    '''
     class Vacancy:
+        ''' класс для представления вакансии
+
+        Attributes:
+            name(str): название вакансии
+            description(str): описание вакансии
+            key_skills(str): ключевые навыки
+            experience_id(str): опыт работы
+            premium(str): флаг премиальности вакансии
+            employer_name(str): Название работадателя
+            salary(str): класс зарплаты
+            salary_from(str or int or float): нижняя граница зарплаты
+            salary_to(str or int or float): верхняя граница зарплаты
+            salary_currency(str): валюта оклада
+            area_name(str): название локации
+            published_at(str): дата публикации
+        '''
 
         def __init__(self, vacancy_dict):
+            '''конструктор класса вакансии
+
+            :param vacancy_dict: словарь с данными о вакансии
+            '''
             for key in vacancy_dict:
                 setattr(self, key, vacancy_dict[key])
 
         def form_salary(self):
+            ''' функция, создающая поле зарплаты
+
+            :return: добавляет поле salary данному объекту класса Vacancy
+            '''
             salary_from = '{:,}'.format(int(float(getattr(self, 'salary_from')))).replace(',', ' ')
             salary_to = '{:,}'.format(int(float(getattr(self, 'salary_to')))).replace(',', ' ')
             salary_gross = 'Без вычета налогов' if getattr(self, 'salary_gross') == 'Да' else 'С вычетом налогов'
@@ -123,25 +215,50 @@ def second_task():
             delattr(self, 'salary_gross')
 
         def format_date(self):
+            ''' функция для форматирования даты
+
+            :return: изменяет формат значения поля published_at
+            '''
             temp = getattr(self, 'published_at')[:10].split('-')
             temp = temp[::-1]
             self.published_at = '.'.join(temp)
 
     def clear_html(vacancy_field):
+        ''' Отчищает строку от html тегов
+
+        :param vacancy_field(str): строка с тегами
+        :return(str): строка без тегов
+        '''
         return re.sub(r"<.*?>", "", vacancy_field)
 
     def form_row(vacancy):
+        ''' формирует массив с данными для добавления в таблицу из вакансии
+
+        :param vacancy(Vacancy): Объект класса Vacancy, из которого нужно сформировать строку таблицы
+        :return: массив с данными для добавления в таблицу
+        '''
         return [vacancy.name, vacancy.description, vacancy.key_skills,
                 vacancy.experience_id, vacancy.premium, vacancy.employer_name,
                 vacancy.salary, vacancy.area_name, vacancy.published_at]
 
     def contains_empty_fields(vacancy):
+        ''' проверяет наличие пустых полей в вакансии
+
+        :param vacancy(Vacancy or dict): данные о вакансии
+        :return(bool): true при наличии пустых полей, false при их отсутствии
+        '''
         for field in vacancy:
             if not field or field.isspace():
                 return True
         return False
 
     def build_table(data_vacancies, dict_naming):
+        '''Конструктор таблицы
+
+        :param data_vacancies(): Массив вакансий
+        :param dict_naming(): словарь с локализацией для названий колонок
+        :return: таблица prettyTable
+        '''
         table = PrettyTable()
         table_sizes = {'№': 20}
         table_names = ['№']
@@ -163,11 +280,21 @@ def second_task():
         return table
 
     def remove_repeated_spaces(text):
+        ''' удаляет повторы пробелов из строки
+
+        :param text(str): строка с пробелами
+        :return(str): строка без пробелов
+        '''
         text = re.sub(r" +", " ", text)
         text = text.strip()
         return text
 
     def replace_boolean_values(text):
+        ''' заменяет bool строки на рускоязычный текстовый аналог
+
+        :param text(str): текст вида True/TRUE/False/FALSE
+        :return(str): строка с переводом
+        '''
         text = re.sub("True", 'Да', text)
         text = re.sub("TRUE", 'Да', text)
         text = re.sub("False", 'Нет', text)
@@ -175,18 +302,38 @@ def second_task():
         return text
 
     def request_parser(text):
+        ''' функция для парсинга поля с навыками
+
+        :param text(str): значение поля навыков
+        :return(str): список навыков
+        '''
         text = text.split(": ")
         if text[0] == "Навыки":
             text[1] = text[1].split(", ")
         return text
 
     def string_reducer(text):
+        ''' уменьшает длину строки до 100 символов.
+        Если строка была больше 100 символов добавляет многоточие в конец
+
+        :param text(str): строка до сокражения
+        :return(str): сокращенная строка
+        '''
         if len(text) > 100:
             text = text[:100]
             text += '...'
         return text
 
     def csv_reader(file_name):
+        ''' функция для считывания значений из файла.
+        В случае некорректного файла не возвращает значений!
+
+        :param file_name(str): название файла с данными
+        Returns:
+            data: список с данными
+
+            titles: список с заголовками
+        '''
         with open(file_name, encoding='utf-8-sig') as csv_file:
             reader = csv.reader(csv_file)
             data = [row for row in reader]
@@ -203,6 +350,12 @@ def second_task():
         return data, titles
 
     def csv_filer(reader, list_naming):
+        '''функция для начальной обработки данных... вроде бы...
+
+        :param reader: список с данными из функции csv_reader
+        :param list_naming: список с заголовками из функции csv_reader
+        :return:
+        '''
         for i in range(len(list_naming)):
             remove_repeated_spaces(list_naming[i])
 
@@ -222,6 +375,11 @@ def second_task():
         return result
 
     def formatter(vacancy):
+        ''' функция для форматирования значений полей объекта класса Vacancy
+
+        :param vacancy(Vacancy): неотформатированная вакансия
+        :return(Vacancy): отформатированная вакансия
+        '''
         vacancy_attributes = [a for a in dir(vacancy) if not a.startswith('__') and not callable(getattr(vacancy, a))]
         for attribute in vacancy_attributes:
             setattr(vacancy, attribute, string_reducer(remove_repeated_spaces(clear_html(getattr(vacancy, attribute)))))
@@ -236,6 +394,13 @@ def second_task():
         return vacancy
 
     def print_vacancies(data_vacancies, dict_naming, request_parameters):
+        ''' функция печати данных о вакансиях.
+
+        :param data_vacancies: список с ваканнсиями
+        :param dict_naming: словарь с локализованными названиями столбцов таблицы
+        :param request_parameters: список с параметрами запроса
+        :return: функция ничего не возвращает
+        '''
         table = build_table(data_vacancies, dict_naming)
 
         # мне очень не нравится как это выглядит, но это единственный способ, как я могу это сделать
@@ -393,6 +558,10 @@ def second_task():
 
 
 def main():
+    ''' точка входа в программу
+
+    :return: функция ничего не возвращает
+    '''
     action = input()
 
     if action == 'Статистика':
