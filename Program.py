@@ -6,6 +6,116 @@ from prettytable import PrettyTable
 
 is_empty_file = False
 
+class Salary:
+    '''класс для представления зарплаты
+
+    Attributes:
+        salary_from(str or int or float): нижняя граница зарплаты
+        salary_to(str or int or float): верхняя граница зарплаты
+        salary_gross(bool): флаг наличия вычета налогов
+        salary_currency(str): валюта оклада
+    '''
+
+    def __init__(self, salary_components):
+        ''' Конструктор класса зарплаты
+
+        :param salary_components: словарь с полями класса
+        '''
+        for key in salary_components:
+            setattr(self, key, salary_components[key])
+
+
+def contains_empty_fields(vacancy):
+    ''' проверяет наличие пустых полей в вакансии
+
+    :param vacancy(Vacancy or dict): данные о вакансии
+    :return(bool): true при наличии пустых полей, false при их отсутствии
+    '''
+    for field in vacancy:
+        if not field or field.isspace():
+            return True
+    return False
+
+
+def remove_repeated_spaces(text):
+    ''' удаляет повторы пробелов из строки
+
+    :param text(str): строка с пробелами
+    :return(str): строка без пробелов
+
+    >>> remove_repeated_spaces('some         text')
+    'some text'
+    >>> remove_repeated_spaces('  some  text  ')
+    'some text'
+    '''
+    text = re.sub(r"\n", ', ', text)
+    text = re.sub(r" +", " ", text)
+    text = text.strip()
+    return text
+
+
+def clear_html(vacancy_field):
+    ''' Отчищает строку от html тегов
+
+    :param vacancy_field(str): строка с тегами
+    :return(str): строка без тегов
+
+    >>> clear_html('<div>some text</div>')
+    'some text'
+    >>> clear_html('<div><p>some <span>text</span></p></div>')
+    'some text'
+    '''
+    return re.sub(r"<.*?>", "", vacancy_field)
+
+def replace_boolean_values(text):
+    ''' заменяет bool строки на рускоязычный текстовый аналог
+
+    :param text(str): текст вида True/TRUE/False/FALSE
+    :return(str): строка с переводом
+    >>> replace_boolean_values("True")
+    'Да'
+     >>> replace_boolean_values("TRUE")
+     'Да'
+    >>> replace_boolean_values("False")
+    'Нет'
+    >>> replace_boolean_values("FALSE")
+    'Нет'
+    '''
+    text = re.sub("True", 'Да', text)
+    text = re.sub("TRUE", 'Да', text)
+    text = re.sub("False", 'Нет', text)
+    text = re.sub("FALSE", 'Нет', text)
+    return text
+
+def request_parser(text):
+    ''' функция для парсинга поля с навыками
+
+    :param text(str): значение поля навыков
+    :return(str): список навыков
+    >>> request_parser('Навыки: Git, ещё что-то, что-то ещё')
+    ['Навыки', ['Git', 'ещё что-то', 'что-то ещё']]
+    '''
+    text = text.split(": ")
+    if text[0] == "Навыки":
+        text[1] = text[1].split(", ")
+    return text
+
+def string_reducer(text):
+    ''' уменьшает длину строки до 100 символов.
+    Если строка была больше 100 символов добавляет многоточие в конец
+
+    :param text(str): строка до сокражения
+    :return(str): сокращенная строка
+    >>> string_reducer("qwerty")
+    'qwerty'
+    >>> string_reducer("qwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwerty")
+    'qwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwertyqwer...'
+    '''
+    if len(text) > 100:
+        text = text[:100]
+        text += '...'
+    return text
+
 def first_task():
     '''функция, запускающая процесс формирования датасета
 
@@ -109,53 +219,6 @@ def first_task():
             self.area_name = vacancy_dict['area_name']
             self.published_at = vacancy_dict['published_at']
 
-    class Salary:
-        '''класс для представления зарплаты
-
-        Attributes:
-            salary_from(str or int or float): нижняя граница зарплаты
-            salary_to(str or int or float): верхняя граница зарплаты
-            salary_gross(bool): флаг наличия вычета налогов
-            salary_currency(str): валюта оклада
-        '''
-        def __init__(self, salary_components):
-            ''' Конструктор класса зарплаты
-
-            :param salary_components: словарь с полями класса
-            '''
-            for key in salary_components:
-                setattr(self, key, salary_components[key])
-
-    def clear_html(vacancy_field):
-        ''' Отчищает строку от html тегов
-
-        :param vacancy_field(str): строка с тегами
-        :return(str): строка без тегов
-        '''
-        return re.sub(r"<.*?>", "", vacancy_field)
-
-    def contains_empty_fields(vacancy):
-        ''' проверяет наличие пустых полей в вакансии
-
-        :param vacancy(Vacancy or dict): данные о вакансии
-        :return(bool): true при наличии пустых полей, false при их отсутствии
-        '''
-        for field in vacancy:
-            if not field or field.isspace():
-                return True
-        return False
-
-    def remove_repeated_spaces(text):
-        ''' удаляет повторы пробелов из строки
-
-        :param text(str): строка с пробелами
-        :return(str): строка без пробелов
-        '''
-        text = re.sub(r"\n", ', ', text)
-        text = re.sub(r" +", " ", text)
-        text = text.strip()
-        return text
-
     file_name = input('Введите название файла: ')
     if not file_name:
         correct_input = False
@@ -169,7 +232,6 @@ def first_task():
         dataSet = DataSet(file_name)
     if (is_empty_file):
         var_dump.var_dump(dataSet)
-
 
 def second_task():
     '''функция запуска процесса формирования таблицы с данными
@@ -223,14 +285,6 @@ def second_task():
             temp = temp[::-1]
             self.published_at = '.'.join(temp)
 
-    def clear_html(vacancy_field):
-        ''' Отчищает строку от html тегов
-
-        :param vacancy_field(str): строка с тегами
-        :return(str): строка без тегов
-        '''
-        return re.sub(r"<.*?>", "", vacancy_field)
-
     def form_row(vacancy):
         ''' формирует массив с данными для добавления в таблицу из вакансии
 
@@ -240,17 +294,6 @@ def second_task():
         return [vacancy.name, vacancy.description, vacancy.key_skills,
                 vacancy.experience_id, vacancy.premium, vacancy.employer_name,
                 vacancy.salary, vacancy.area_name, vacancy.published_at]
-
-    def contains_empty_fields(vacancy):
-        ''' проверяет наличие пустых полей в вакансии
-
-        :param vacancy(Vacancy or dict): данные о вакансии
-        :return(bool): true при наличии пустых полей, false при их отсутствии
-        '''
-        for field in vacancy:
-            if not field or field.isspace():
-                return True
-        return False
 
     def build_table(data_vacancies, dict_naming):
         '''Конструктор таблицы
@@ -278,51 +321,6 @@ def second_task():
             table.add_row(vacancy_data)
 
         return table
-
-    def remove_repeated_spaces(text):
-        ''' удаляет повторы пробелов из строки
-
-        :param text(str): строка с пробелами
-        :return(str): строка без пробелов
-        '''
-        text = re.sub(r" +", " ", text)
-        text = text.strip()
-        return text
-
-    def replace_boolean_values(text):
-        ''' заменяет bool строки на рускоязычный текстовый аналог
-
-        :param text(str): текст вида True/TRUE/False/FALSE
-        :return(str): строка с переводом
-        '''
-        text = re.sub("True", 'Да', text)
-        text = re.sub("TRUE", 'Да', text)
-        text = re.sub("False", 'Нет', text)
-        text = re.sub("FALSE", 'Нет', text)
-        return text
-
-    def request_parser(text):
-        ''' функция для парсинга поля с навыками
-
-        :param text(str): значение поля навыков
-        :return(str): список навыков
-        '''
-        text = text.split(": ")
-        if text[0] == "Навыки":
-            text[1] = text[1].split(", ")
-        return text
-
-    def string_reducer(text):
-        ''' уменьшает длину строки до 100 символов.
-        Если строка была больше 100 символов добавляет многоточие в конец
-
-        :param text(str): строка до сокражения
-        :return(str): сокращенная строка
-        '''
-        if len(text) > 100:
-            text = text[:100]
-            text += '...'
-        return text
 
     def csv_reader(file_name):
         ''' функция для считывания значений из файла.
