@@ -4,3 +4,4 @@
 ![Снимок экрана (1207)](https://user-images.githubusercontent.com/103203881/205116176-8a4715eb-b74b-4f69-85d7-91677390cf20.png)
 ![Снимок экрана (1206)](https://user-images.githubusercontent.com/103203881/205116186-11ca2ee4-f49b-47d0-abe3-c3472e51f82f.png)
 ![Снимок экрана (1205)](https://user-images.githubusercontent.com/103203881/205116198-7fa57c2d-071d-44a5-b21c-d48a9dadaa6c.png)
+![Снимок экрана (1211)](https://user-images.githubusercontent.com/103203881/209686243-eb2b0b03-c49e-457e-b7f6-1e02b3d92e32.png)
