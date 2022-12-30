@@ -1,11 +1,12 @@
 import time
-
 import pandas as pd
 import os
+import concurrent.futures as pool
 from multiprocessing import Pool
 from csv_splitter import split
 
 vacancy_name = 'программист'
+
 
 def join_dict(dict1, dict2):
     for i in dict2:
@@ -42,14 +43,16 @@ def analyze(filename):
 
     all_vacancies_count = len(df.index)
 
-    vacancy_salary = int(vacancy_df['salary'].mean())
+    if(vacancy_df.empty):
+        vacancy_salary = 0
+    else:
+        vacancy_salary = int(vacancy_df['salary'].mean())
 
     vacancy_count = len(vacancy_df.index)
 
     city_salary = df.groupby(['area_name']).sum().round().to_dict('dict')['salary']
     city_count = df.groupby(['area_name']).count().to_dict('dict')['salary']
-    #print(df.dtypes)
-    #print(df.head())
+
     return (salary, all_vacancies_count, vacancy_salary, vacancy_count, city_salary, city_count)
 
 
@@ -98,11 +101,20 @@ def summarise(x):
     print('Доля вакансий по городам (в порядке убывания):', end=' ')
     print(city_count)
 
+def getdata():
+    global vacancy_name
+    # split(input("Введите название файла"))
+    vacancy_name = input('Введите название профессии:')
+
 
 if __name__ == '__main__':
-    split(input("Введите название файла"))
-    profession_name = input('Введите название профессии:')
-
     csvs = os.listdir(fr"C:\Users\Admin\Desktop\Прога\3 семестр\Python\Kuleshov\splited_csv")
-    with Pool(8) as p:
-        summarise(p.map(analyze, csvs))
+    getdata()
+    start_time = time.time()
+
+    with pool.ThreadPoolExecutor() as executor:
+        summarise(list(executor.map(analyze, csvs)))
+
+    #with Pool(8) as p:
+    #    summarise(p.map(analyze, csvs))
+    print(time.time() - start_time)
