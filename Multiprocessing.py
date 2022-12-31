@@ -1,7 +1,5 @@
-import time
 import pandas as pd
 import os
-import concurrent.futures as pool
 from multiprocessing import Pool
 from csv_splitter import split
 
@@ -110,11 +108,6 @@ def getdata():
 if __name__ == '__main__':
     csvs = os.listdir(fr"C:\Users\Admin\Desktop\Прога\3 семестр\Python\Kuleshov\splited_csv")
     getdata()
-    start_time = time.time()
 
-    with pool.ThreadPoolExecutor() as executor:
-        summarise(list(executor.map(analyze, csvs)))
-
-    #with Pool(8) as p:
-    #    summarise(p.map(analyze, csvs))
-    print(time.time() - start_time)
+    with Pool(8) as p:
+        summarise(p.map(analyze, csvs))
